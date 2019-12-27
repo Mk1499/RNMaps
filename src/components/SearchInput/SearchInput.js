@@ -1,84 +1,38 @@
 import React, { Component } from "react";
-import {
-  Text,
-  View,
-  TextInput,
-  KeyboardAvoidingView,
-  StyleSheet,
-  TouchableOpacity,
-  TouchableOpacityBase
-} from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity , Keyboard} from "react-native";
+import { ListItem, List, Item, Input, Icon } from "native-base";
 
-import { Container, ListItem, List, Item, Input, Icon } from "native-base";
+import { connect } from "react-redux";
+import { changeLocation } from "../../actions/MapActions";
+import { viewRecommended, emptyRecommended } from "../../actions/SearchActions";
 
-export default class SearchInput extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      searchText: "",
-      recommended: [],
-      places: [
-        {
-          id: 1,
-          name: "Nasr City",
-          latitude: 30.056388,
-          longitude: 31.36429
-        },
-        {
-          id: 2,
-          name: "Roxy",
-          latitude: 30.092794,
-          longitude: 31.314846
-        },
-        {
-          id: 3,
-          name: "Haram",
-          latitude: 30.012568,
-          longitude: 31.208041
-        }
-      ]
-    };
-  }
+import { bindActionCreators } from "redux";
 
-  _viewRecommended = text => {
-    console.log("TEXT : ", text);
-    console.log("Haram".search(text));
-    let reg = new RegExp(text, "i");
-    let result = this.state.places.filter(
-      place => text != "" && place.name.match(reg) != null
-    );
-    // if (result.length>0)
-    this.setState({
-      recommended: result
-    });
-    console.log("Results : ", result);
-  };
-
+class SearchInput extends Component {
   render() {
+    console.log("Props : ", this.props);
+
     return (
-      <View
-        onPress={() => alert("frk")}
-        style={[styles.searchInput, this.props.style]}
-      >
-        {/* <TextInput placeholder="Seach place here" 
-          inlineImageLeft='search_icon'/> */}
+      <View style={[styles.searchInput, this.props.style]}>
+       
         <Item>
           <Icon active name="search" />
           <Input
-            placeholder="Seach Places Here"
-            onChangeText={text => this._viewRecommended(text)}
+            placeholder={this.props.LanguageReducer.language == "AR" ? "ابحث عن الاماكن هنا": "Search places Here"}
+            onChangeText={text => this.props.viewRecommended(text)}
           />
         </Item>
         <List>
-          {this.state.recommended.length > 0
-            ? this.state.recommended.map(suggest => (
+          {this.props.SearchReducer.recommended.length > 0
+            ? this.props.SearchReducer.recommended.map(suggest => (
                 <ListItem key={suggest.id}>
                   <TouchableOpacity
                     style={styles.ListItem}
                     onPress={() => {
-                        this.setState({recommended:[]})
-                        this.props.changeLocation(suggest)}
-                    }
+                      Keyboard.dismiss();
+                      this.props.emptyRecommended();
+                      this.props.changeLocation(suggest);
+                    }}
                   >
                     <Text>{suggest.name}</Text>
                   </TouchableOpacity>
@@ -113,3 +67,19 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   }
 });
+const mapStateToProps = state => {
+  const { MapReducer, SearchReducer, LanguageReducer } = state;
+  return { MapReducer, SearchReducer, LanguageReducer };
+};
+
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(
+    {
+      changeLocation,
+      viewRecommended,
+      emptyRecommended
+    },
+    dispatch
+  );
+
+export default connect(mapStateToProps, mapDispatchToProps)(SearchInput);

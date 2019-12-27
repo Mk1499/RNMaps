@@ -1,11 +1,15 @@
 import React, { Component } from "react";
-import { Text, View, StyleSheet, Dimensions, TextInput } from "react-native";
-import MapView, { Marker, AnimatedRegion } from "react-native-maps";
+import { View, StyleSheet, Dimensions } from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import { connect } from 'react-redux';
+
 
 const { width: Width, height: Height } = Dimensions.get("window");
-export default class CustomMapView extends Component {
+
+class CustomMapView extends Component {
 
   render() {
+    
     return (
       <View style={styles.container}>
         <View>
@@ -20,12 +24,12 @@ export default class CustomMapView extends Component {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421
           }} 
-          region = {new AnimatedRegion({
+          region = {{
             latitude: this.props.activeLocation.latitude,
             longitude: this.props.activeLocation.longitude,
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421
-          })}
+          }}
         >
           <Marker
             coordinate = {this.props.activeLocation}
@@ -49,3 +53,13 @@ const styles = StyleSheet.create({
     height: Height
   }
 });
+
+const mapStateToProps = (state) => {
+
+  const { MapReducer } = state
+  console.log("State : ",mapReducer);
+  
+  return  MapReducer; 
+};
+
+export default connect(mapStateToProps)(CustomMapView);
